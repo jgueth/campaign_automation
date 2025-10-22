@@ -1,0 +1,267 @@
+================================================================================
+CAMPAIGN AUTOMATION TOOL - ARCHITECTURE DIAGRAM
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                            USER INTERFACES                                  │
+│  ┌──────────────────────────┐        ┌──────────────────────────────┐      │
+│  │   Command Line (CLI)     │        │    Agent Watcher (Auto)      │      │
+│  │  - run_workflow.cmd      │        │  - start_agent.cmd           │      │
+│  │  - Manual execution      │        │  - File monitoring           │      │
+│  └────────────┬─────────────┘        └────────────┬─────────────────┘      │
+└───────────────┼──────────────────────────────────┼────────────────────────┘
+                │                                    │
+                └─────────────┬──────────────────────┘
+                              │
+┌─────────────────────────────▼───────────────────────────────────────────────┐
+│                      WORKFLOW ORCHESTRATOR                                  │
+│                        (workflow.py)                                        │
+│                                                                             │
+│  Step 0: [Optional] Download from Dropbox                                  │
+│  Step 1: Validate Campaign YAML ────────────┐                              │
+│  Step 2: Validate Required Assets ──────────┤                              │
+│  Step 3: Generate Output Folder Structure   │                              │
+│  Step 4: Generate Image Prompts (GPT-5)     │                              │
+│  Step 5: Generate Hero Images (Gemini)      │                              │
+│  Step 6: Localize Campaign Images (Gemini)  │                              │
+│  Step 7: Generate Campaign Report           │                              │
+│  Step 8: [Optional] Upload to Dropbox       │                              │
+└──────┬──────┬──────┬──────┬──────┬──────┬──┴────┬─────────────────────────┘
+       │      │      │      │      │      │       │
+       ▼      ▼      │      ▼      ▼      ▼       │
+   ┌───────────┐    │  ┌────────────────────┐     │
+   │ Campaign  │    │  │   Image Prompt     │     │
+   │ Validator │    │  │   Generator        │     │
+   │           │    │  │  (GPT-5)           │     │
+   │ - Schema  │    │  └─────────┬──────────┘     │
+   │   Check   │    │            │                │
+   └─────┬─────┘    │            │                │
+         │          │            ▼                │
+         │          │  ┌────────────────────┐     │
+         │          │  │   Hero Image       │     │
+         │          │  │   Generator        │     │
+         │          │  │  (Gemini 2.5)      │     │
+         │          │  │                    │     │
+         │          │  │ - Compositing      │     │
+         │          │  │ - Product + Logo   │     │
+         │          │  └─────────┬──────────┘     │
+         │          │            │                │
+         ▼          ▼            ▼                ▼
+   ┌─────────────────────────────────────────────────┐
+   │            VALIDATION LAYER                     │
+   │  ┌──────────────┐      ┌──────────────┐        │
+   │  │   Assets     │      │   Campaign   │        │
+   │  │  Validator   │      │   Localizer  │        │
+   │  │              │      │  (Gemini)    │        │
+   │  │ - Product    │      │              │        │
+   │  │ - Logo       │      │ - Text       │        │
+   │  │ - Hero       │      │ - Translation│        │
+   │  └──────┬───────┘      └──────┬───────┘        │
+   └─────────┼─────────────────────┼────────────────┘
+             │                     │
+             ▼                     ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                          DATA STORAGE                                      │
+│                                                                            │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐        │
+│  │   input/         │  │   output/        │  │   credentials    │        │
+│  │                  │  │                  │  │   .json          │        │
+│  │ - campaigns/     │  │ - {campaign_id}/ │  │                  │        │
+│  │   - *.yaml       │  │   - images/      │  │ - OpenAI key     │        │
+│  │                  │  │   - report.md    │  │ - Gemini key     │        │
+│  │ - assets/        │  │                  │  │ - Dropbox token  │        │
+│  │   - products/    │  │                  │  │                  │        │
+│  │   - logos/       │  │                  │  │                  │        │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘        │
+│                                                                            │
+│  ┌──────────────────┐  ┌──────────────────┐                              │
+│  │   schema/        │  │   logs/          │                              │
+│  │                  │  │   (agent mode)   │                              │
+│  │ - campaign_      │  │                  │                              │
+│  │   schema.yaml    │  │ - workflow_*.log │                              │
+│  │                  │  │                  │                              │
+│  │ - structure_     │  │                  │                              │
+│  │   guide.md       │  │                  │                              │
+│  └──────────────────┘  └──────────────────┘                              │
+└────────────────────────────────────────────────────────────────────────────┘
+             │                     │                         │
+             ▼                     ▼                         ▼
+┌────────────────────────────────────────────────────────────────────────────┐
+│                      EXTERNAL SERVICES (APIs)                              │
+│                                                                            │
+│  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐        │
+│  │   OpenAI         │  │   Google         │  │   Dropbox        │        │
+│  │   GPT-5          │  │   Gemini 2.5     │  │   (Optional)     │        │
+│  │                  │  │   Flash          │  │                  │        │
+│  │ - Prompt         │  │                  │  │ - Input sync     │        │
+│  │   Generation     │  │ - Hero images    │  │ - Output sync    │        │
+│  │                  │  │ - Localization   │  │ - Backup         │        │
+│  └──────────────────┘  └──────────────────┘  └──────────────────┘        │
+└────────────────────────────────────────────────────────────────────────────┘
+
+
+================================================================================
+WORKFLOW DATA FLOW
+================================================================================
+
+User Input (YAML)
+    │
+    ├──> [1] Campaign Validator ──> Schema Check ──> ✓ / ✗
+    │
+    ├──> [2] Assets Validator ──> File Check ──> ✓ / ✗
+    │
+    └──> [3] Output Folder Generator ──> Create folder structure
+              │
+              ├──> output/{campaign_id}/{product_id}/{ratio}/
+              │
+              └──> For each Product:
+                      │
+                      ├──> [4] GPT-5: Generate Image Prompt
+                      │        │
+                      │        └──> Scene description text
+                      │
+                      └──> For each Aspect Ratio (16:9, 1:1, 9:16):
+                              │
+                              ├──> [5] Gemini: Generate Hero Image
+                              │        │
+                              │        ├──> Input: Prompt + Product + Logo
+                              │        │
+                              │        └──> Output: Base image (no text)
+                              │
+                              └──> For each Market (en-US, de-DE, fr-FR, ...):
+                                      │
+                                      └──> [6] Gemini: Localize Image
+                                              │
+                                              ├──> Input: Base image + Text
+                                              │
+                                              └──> Output: Localized image
+                                                      │
+                                                      └──> Saved to:
+                                                           output/{campaign}/
+                                                           {product}/{ratio}/
+                                                           {market}/
+
+
+================================================================================
+COMPONENT BREAKDOWN
+================================================================================
+
+┌────────────────────────────────────────────────────────────────────────────┐
+│ MODULE                     │ FILE                        │ PURPOSE          │
+├────────────────────────────┼─────────────────────────────┼──────────────────┤
+│ Workflow Orchestrator      │ workflow.py                 │ Main controller  │
+│ Campaign Validator         │ campaign_validator.py       │ YAML validation  │
+│ Assets Validator           │ assets_validator.py         │ File checking    │
+│ Folder Generator           │ output_folder_generator.py  │ Structure setup  │
+│ Prompt Generator           │ gen_ai/generate_image_      │ GPT-5 prompts    │
+│                            │ prompt.py                   │                  │
+│ Hero Image Generator       │ gen_ai/generate_hero_       │ Gemini images    │
+│                            │ image.py                    │                  │
+│ Campaign Localizer         │ gen_ai/localize_campaign.py │ Gemini text      │
+│ Report Generator           │ generate_report.py          │ Markdown report  │
+│ Dropbox Helper             │ helper/dropbox_helper.py    │ Cloud sync       │
+│ Agent Watcher              │ agent/agent_watcher.py      │ File monitoring  │
+│ Credentials Manager        │ credentials.py              │ API keys         │
+└────────────────────────────┴─────────────────────────────┴──────────────────┘
+
+
+================================================================================
+KEY DESIGN PATTERNS
+================================================================================
+
+1. MODULAR ARCHITECTURE
+   - Each component is independent
+   - Single Responsibility Principle
+   - Easy to test and maintain
+
+2. TWO-STAGE IMAGE GENERATION
+   Stage 1: Base images (no localization)
+            └─> One image per product × aspect ratio
+
+   Stage 2: Localized images (with text)
+            └─> One image per product × ratio × market
+
+3. VALIDATION BEFORE PROCESSING
+   Fail fast: Check everything before API calls
+   └─> Saves time and API costs
+
+4. OPTIONAL CLOUD INTEGRATION
+   Dropbox sync is opt-in (--dropbox flag)
+   └─> Works fully offline by default
+
+5. FILE-BASED CONFIGURATION
+   YAML for campaigns (human-readable)
+   JSON for credentials (machine-readable)
+   └─> Git-friendly, version controllable
+
+
+================================================================================
+PROCESSING EXAMPLE
+================================================================================
+
+Input Campaign:
+  - 3 products (Diffuser, Candle Set, Throw Blanket)
+  - 3 aspect ratios (16:9, 1:1, 9:16)
+  - 4 markets (en-US, de-DE, fr-FR, es-ES)
+
+Processing Steps:
+  1. Validate YAML: ✓
+  2. Check 6 assets (3 products + 3 logos): ✓
+  3. Create folder structure: 36 folders
+  4. Generate 3 prompts with GPT-5: ~15 seconds
+  5. Generate 9 base images with Gemini: ~3 minutes
+  6. Generate 36 localized images with Gemini: ~9 minutes
+  7. Generate report: ✓
+
+Total Output:
+  - 36 localized campaign images
+  - 9 base images (non-localized)
+  - 1 campaign report
+  - Total time: ~12-15 minutes
+  - Total API calls: 3 (GPT) + 45 (Gemini) = 48 calls
+
+
+================================================================================
+FILE STRUCTURE OUTPUT EXAMPLE
+================================================================================
+
+output/
+└── holiday_campaign_2024/
+    ├── aromatherapy_diffuser_set/
+    │   ├── 16x9/
+    │   │   ├── campaign_aromatherapy_diffuser_set_16x9.png  (base)
+    │   │   ├── en-US/
+    │   │   │   └── campaign_aromatherapy_diffuser_set_en-US_16x9.png
+    │   │   ├── de-DE/
+    │   │   │   └── campaign_aromatherapy_diffuser_set_de-DE_16x9.png
+    │   │   ├── fr-FR/
+    │   │   │   └── campaign_aromatherapy_diffuser_set_fr-FR_16x9.png
+    │   │   └── es-ES/
+    │   │       └── campaign_aromatherapy_diffuser_set_es-ES_16x9.png
+    │   ├── 1x1/
+    │   │   └── ... (same structure)
+    │   └── 9x16/
+    │       └── ... (same structure)
+    ├── luxury_candle_gift_set/
+    │   └── ... (same structure)
+    ├── cashmere_throw_blanket/
+    │   └── ... (same structure)
+    └── campaign_report.md
+
+
+================================================================================
+VIEWING THIS DIAGRAM
+================================================================================
+
+This is a text-based ASCII diagram that should render correctly in any text
+viewer or terminal.
+
+For the Mermaid diagrams in architecture.md, you can:
+
+1. View on GitHub (automatic Mermaid rendering)
+2. Use VS Code with "Markdown Preview Mermaid Support" extension
+3. Copy the Mermaid code to: https://mermaid.live/
+4. Use GitHub Gist with .md extension
+5. Use documentation sites (GitBook, Notion, etc.)
+
+================================================================================

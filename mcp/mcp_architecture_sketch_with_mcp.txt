@@ -1,0 +1,33 @@
+          ┌────────────────────────────────────────────────────────┐
+          │                 Any MCP-capable client                 │
+          │   (IDE agent, chat UI, orchestrator, CI step, etc.)   │
+          └───────────────┬──────────────┬───────────────┬────────┘
+                          │              │               │
+                   call tool:      call tool:       call tool:
+                   run_workflow    analyze_workflow  save_analysis
+                          │              │               │
+                          └──────┬───────┴───────┬───────┘
+                                 ▼               ▼
+                         ┌────────────────────────────────┐
+                         │     MCP Server (FastMCP)       │
+                         │  Tools:                        │
+                         │   - run_workflow(input_path |  │
+                         │     inline_yaml)               │
+                         │   - analyze_workflow(...)      │
+                         │   - save_analysis(...)         │
+                         │  Resource: reports://latest    │
+                         └───────────┬────────────────────┘
+                                     │ delegates to your code
+          ┌──────────────────────────┼────────────────────────────┐
+          │                          │                            │
+          ▼                          ▼                            ▼
+┌───────────────────────┐  ┌───────────────────────────┐  ┌───────────────────┐
+│ run_workflow_processor│  │ analyze_with_gemini (SDK) │  │ save_agent_log    │
+│ → process_agent_data  │  │ → Google Gemini API       │  │ → filesystem      │
+└───────────┬───────────┘  └──────────────┬────────────┘  └─────────┬─────────┘
+            │ workflow_data               │ analysis_md              │ paths
+            └──────────────┬──────────────┴──────────────┬───────────┘
+                           ▼                             ▼
+                    ┌───────────────────────────┐  ┌───────────────────────────┐
+                    │ Logs (workflow_log*.txt)  │  │ Reports (*.md / *.txt)    │
+                    └───────────────────────────┘  └───────────────────────────┘

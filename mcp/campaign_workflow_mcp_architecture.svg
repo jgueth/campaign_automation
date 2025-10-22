@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="900" viewBox="0 0 1200 900">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="10" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,3 L0,6 z" fill="#333" />
+    </marker>
+    <style>
+      .title { font: bold 24px sans-serif; fill: #111; }
+      .subtitle { font: bold 18px sans-serif; fill: #222; }
+      .box { fill: #f9fafb; stroke: #cbd5e1; stroke-width: 2; rx: 10; }
+      .box-strong { fill: #eef2ff; stroke: #6366f1; stroke-width: 2; rx: 12; }
+      .box-accent { fill: #ecfeff; stroke: #06b6d4; stroke-width: 2; rx: 12; }
+      .text { font: 14px sans-serif; fill: #111; }
+      .mono { font: 13px monospace; fill: #111; }
+      .arrow { stroke: #333; stroke-width: 2; fill: none; marker-end: url(#arrow); }
+      .divider { stroke: #e5e7eb; stroke-width: 2; }
+    </style>
+  </defs>
+
+  <!-- Titles -->
+  <text x="50" y="50" class="title">Campaign Workflow — Existing Flow vs MCP Exposure</text>
+
+  <!-- Left panel: Existing Watch-Mode Flow -->
+  <text x="50" y="90" class="subtitle">A) Existing Watch-Mode (file watcher)</text>
+  <!-- Boxes -->
+  <rect x="50" y="110" width="260" height="90" class="box"/>
+  <text x="70" y="140" class="text">YAML producers</text>
+  <text x="70" y="160" class="mono">- Human upload</text>
+  <text x="70" y="178" class="mono">- CI pipeline</text>
+
+  <rect x="360" y="130" width="220" height="70" class="box"/>
+  <text x="375" y="160" class="text">File Watcher (watchdog)</text>
+
+  <rect x="650" y="120" width="250" height="90" class="box-strong"/>
+  <text x="665" y="148" class="text">run_workflow_processor()</text>
+  <text x="665" y="170" class="mono">→ process_agent_data</text>
+
+  <rect x="650" y="240" width="250" height="90" class="box-strong"/>
+  <text x="665" y="268" class="text">analyze_workflow_with_gemini()</text>
+  <text x="665" y="290" class="mono">→ Google Gemini SDK</text>
+
+  <rect x="650" y="360" width="250" height="90" class="box-strong"/>
+  <text x="665" y="388" class="text">save_agent_log()</text>
+  <text x="665" y="410" class="mono">→ logs + report files</text>
+
+  <rect x="950" y="240" width="200" height="210" class="box"/>
+  <text x="965" y="270" class="text">Artifacts</text>
+  <text x="965" y="295" class="mono">- workflow_log*.txt</text>
+  <text x="965" y="315" class="mono">- *.md (analysis)</text>
+  <text x="965" y="335" class="mono">- report paths</text>
+
+  <!-- Arrows (Existing) -->
+  <path d="M310,155 L360,165" class="arrow"/>
+  <path d="M580,165 L650,165" class="arrow"/>
+  <path d="M775,210 L775,240" class="arrow"/>
+  <path d="M775,330 L775,360" class="arrow"/>
+  <path d="M900,300 L950,300" class="arrow"/>
+  <path d="M900,405 L950,405" class="arrow"/>
+
+  <!-- Divider -->
+  <line x1="50" y1="470" x2="1150" y2="470" class="divider"/>
+  <text x="50" y="505" class="subtitle">B) MCP-Exposed Tools (recommended)</text>
+
+  <!-- MCP client side -->
+  <rect x="50" y="530" width="350" height="120" class="box"/>
+  <text x="70" y="560" class="text">Any MCP-capable client</text>
+  <text x="70" y="582" class="mono">- IDE agent / Chat UI</text>
+  <text x="70" y="602" class="mono">- Orchestrator / CI step</text>
+
+  <!-- Tool call lines -->
+  <text x="430" y="560" class="mono">call: run_workflow()</text>
+  <text x="430" y="580" class="mono">call: analyze_workflow()</text>
+  <text x="430" y="600" class="mono">call: save_analysis()</text>
+
+  <!-- MCP server -->
+  <rect x="600" y="520" width="260" height="140" class="box-accent"/>
+  <text x="615" y="550" class="text">MCP Server (FastMCP)</text>
+  <text x="615" y="572" class="mono">tools:</text>
+  <text x="635" y="590" class="mono">- run_workflow(path | inline_yaml)</text>
+  <text x="635" y="608" class="mono">- analyze_workflow(...)</text>
+  <text x="635" y="626" class="mono">- save_analysis(...)</text>
+  <text x="615" y="644" class="mono">resource: reports://latest</text>
+
+  <!-- Arrows client -> MCP -->
+  <path d="M400,570 L600,570" class="arrow"/>
+  <path d="M400,590 L600,590" class="arrow"/>
+  <path d="M400,610 L600,610" class="arrow"/>
+
+  <!-- Your code behind MCP -->
+  <rect x="900" y="510" width="250" height="90" class="box-strong"/>
+  <text x="915" y="536" class="text">run_workflow_processor()</text>
+  <text x="915" y="558" class="mono">→ process_agent_data</text>
+
+  <rect x="900" y="610" width="250" height="90" class="box-strong"/>
+  <text x="915" y="636" class="text">analyze_with_gemini()</text>
+  <text x="915" y="658" class="mono">→ Gemini SDK</text>
+
+  <rect x="900" y="710" width="250" height="90" class="box-strong"/>
+  <text x="915" y="736" class="text">save_agent_log()</text>
+  <text x="915" y="758" class="mono">→ filesystem</text>
+
+  <!-- Arrows MCP -> your code -->
+  <path d="M860,555 L900,555" class="arrow"/>
+  <path d="M860,655 L900,655" class="arrow"/>
+  <path d="M860,755 L900,755" class="arrow"/>
+</svg>

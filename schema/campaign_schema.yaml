@@ -1,0 +1,82 @@
+# ===========================================
+# Campaign Structure Schema
+# ===========================================
+# This file defines the required structure for campaign YAML files.
+# Use this as a reference/validation template for creating new campaigns.
+
+campaign:
+  # Required fields
+  id: string                    # Unique campaign identifier (e.g., "holiday_gift_guide_2025_eu")
+  name: string                  # Campaign display name
+  description: string           # Brief campaign description
+
+  # Regional information
+  region: string                # Region code (e.g., "EU", "NA", "APAC")
+
+  # Market-specific localization (array of markets)
+  markets:
+    - market_id: string         # Market identifier (e.g., "uk", "de", "fr")
+      country: string           # Country name
+      language: string          # Language code (e.g., "en-GB", "de-DE")
+
+  # Target audience
+  target:
+    audience: string            # Description of target demographic
+
+  # Campaign timeline
+  schedule:
+    start_date: string          # Format: "YYYY-MM-DD"
+    end_date: string            # Format: "YYYY-MM-DD"
+
+  # Brand messages (English only - translated by pipeline)
+  message:
+    primary: string             # Main campaign message
+    secondary: string           # Supporting message/offer
+    cta: string                 # Call-to-action text
+
+# ===========================================
+# Products to Feature
+# ===========================================
+products:
+  - id: string                  # Unique product identifier
+    name: string                # Product display name
+    description: string         # Product description
+    category: string            # Product category
+
+    # Asset information
+    assets:
+      product_image: string         # Required: Filename of product image
+      logo: string                  # Required: Brand logo filename
+      hero_image: string|null       # Optional: Final creative (typically generated)
+
+    # Product-specific message
+    message: string             # Product tagline (English - will be translated)
+
+# ===========================================
+# Creative Requirements
+# ===========================================
+creative:
+  # Required aspect ratios (array)
+  aspect_ratios:
+    - string                    # e.g., "1x1", "9x16", "16x9"
+
+  # Visual style
+  style:
+    mood: string                # Comma-separated mood descriptors
+    colors: [string]            # Array of color names
+    setting: string             # Scene/environment description
+
+  # Text overlay requirements
+  text_overlay:
+    include_message: boolean    # Include campaign message
+    include_cta: boolean        # Include call-to-action
+    include_logo: boolean       # Include brand logo
+
+# ===========================================
+# Approval & Compliance
+# ===========================================
+compliance_checks:
+  - string                      # Array of compliance check types
+                                # Examples: "brand_colors", "logo_presence",
+                                # "prohibited_words", "holiday_inclusivity",
+                                # "language_accuracy"

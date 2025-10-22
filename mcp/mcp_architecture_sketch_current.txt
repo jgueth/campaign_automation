@@ -1,0 +1,36 @@
+                  ┌──────────────────────┐
+                  │   YAML producers     │
+     (human, CI)  │  - Human upload      │
+                  │  - CI pipeline       │
+                  └─────────┬────────────┘
+                            │ YAML (.yaml)
+                    ┌───────▼────────┐
+   Watch-mode        │ File Watcher   │  (optional)
+   (existing)        │ (watchdog)     │
+                    └───────┬────────┘
+                            │ triggers
+                            ▼
+                ┌───────────────────────────┐
+                │ run_workflow_processor()   │
+                │  - invokes process_agent_data tool
+                │  - collects logs + outputs
+                └───────────┬────────────────┘
+                            │ workflow_data
+                            ▼
+                ┌───────────────────────────┐
+                │ analyze_workflow_with_    │
+                │ gemini(filename, data)    │
+                │  - uses Gemini SDK        │
+                └───────────┬────────────────┘
+                            │ analysis_md
+                            ▼
+                ┌───────────────────────────┐
+                │ save_agent_log()          │
+                │  - agent_log_path         │
+                │  - gemini_report_path     │
+                └───────────┬────────────────┘
+                            │ artifacts
+                            ▼
+                ┌───────────────────────────┐
+                │   Logs / Reports folder   │
+                └───────────────────────────┘
