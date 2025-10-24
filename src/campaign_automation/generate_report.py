@@ -290,7 +290,14 @@ def generate_campaign_report(
 
     # Print to console if requested
     if print_to_console:
-        print(report_content)
+        try:
+            print(report_content)
+        except UnicodeEncodeError:
+            # Windows console encoding issue - print with errors='replace'
+            # This replaces problematic characters (like emojis) with '?'
+            import sys
+            safe_content = report_content.encode(sys.stdout.encoding or 'utf-8', errors='replace').decode(sys.stdout.encoding or 'utf-8')
+            print(safe_content)
 
     # Save to file if requested
     if output_file:
@@ -298,7 +305,10 @@ def generate_campaign_report(
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(report_content, encoding='utf-8')
         if print_to_console:
-            print(f"\n[INFO] Report saved to: {output_file}")
+            try:
+                print(f"\n[INFO] Report saved to: {output_file}")
+            except UnicodeEncodeError:
+                print(f"\n[INFO] Report saved to: {output_file}".encode(sys.stdout.encoding or 'utf-8', errors='replace').decode(sys.stdout.encoding or 'utf-8'))
 
     return report_content
 

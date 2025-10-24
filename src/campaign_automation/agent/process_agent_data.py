@@ -71,8 +71,10 @@ def run_workflow_and_capture(yaml_path: str, use_dropbox: bool = False) -> dict:
 
     # Run workflow as a module (python -m campaign_automation.workflow)
     # This allows relative imports to work properly
+    # Add -u flag to unbuffer output (critical for subprocess stdout capture)
     command = [
         sys.executable,  # Use the same Python interpreter
+        "-u",  # Unbuffered output - ensures stdout is captured
         "-m",
         "campaign_automation.workflow",
         yaml_path
@@ -98,13 +100,18 @@ def run_workflow_and_capture(yaml_path: str, use_dropbox: bool = False) -> dict:
     else:
         env['PYTHONPATH'] = str(src_path)
 
+    # Force unbuffered output for subprocess (ensures stdout is captured)
+    env['PYTHONUNBUFFERED'] = '1'
+
     # Execute workflow and capture all output (no live streaming to console)
     try:
         result = subprocess.run(
             command,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
             encoding='utf-8',
+            errors='replace',  # Handle any encoding errors gracefully
             timeout=600,  # 10 minute timeout
             cwd=str(project_root),  # Run from project root
             env=env  # Pass environment with PYTHONPATH
@@ -114,6 +121,9 @@ def run_workflow_and_capture(yaml_path: str, use_dropbox: bool = False) -> dict:
         workflow_log = ""
         if result.stdout:
             workflow_log += "=== STDOUT ===\n" + result.stdout + "\n"
+        else:
+            workflow_log += "=== STDOUT ===\n(no stdout captured)\n\n"
+
         if result.stderr:
             workflow_log += "=== STDERR ===\n" + result.stderr + "\n"
 
@@ -154,13 +164,18 @@ def run_workflow_and_capture(yaml_path: str, use_dropbox: bool = False) -> dict:
     # Look for report in output/{campaign_id}/campaign_report.md
     # Try to find the campaign ID from the output folder
     output_dir = Path("output")
+    print(f"[Process Agent] Searching for campaign report in: {output_dir.absolute()}")
+
     if output_dir.exists():
         # Get all subdirectories in output (campaign folders)
         campaign_dirs = [d for d in output_dir.iterdir() if d.is_dir()]
+        print(f"[Process Agent] Found {len(campaign_dirs)} campaign directory(ies): {[d.name for d in campaign_dirs]}")
 
         # Try each campaign directory
         for campaign_dir in campaign_dirs:
             potential_report = campaign_dir / "campaign_report.md"
+            print(f"[Process Agent] Checking for report at: {potential_report}")
+
             if potential_report.exists():
                 try:
                     with open(potential_report, 'r', encoding='utf-8') as f:
@@ -170,6 +185,10 @@ def run_workflow_and_capture(yaml_path: str, use_dropbox: bool = False) -> dict:
                     break  # Found the report, stop looking
                 except Exception as e:
                     print(f"[Process Agent] WARNING: Could not read report at {potential_report}: {e}")
+            else:
+                print(f"[Process Agent] Report not found at: {potential_report}")
+    else:
+        print(f"[Process Agent] Output directory does not exist: {output_dir.absolute()}")
 
     if report_content is None:
         print(f"[Process Agent] No campaign report found (this is expected if workflow failed)")
@@ -191,6 +210,12 @@ def main():
     Command-line interface for running workflow and capturing outputs.
     Outputs JSON result to stdout for the agent to capture.
     """
+    # Ensure stdout uses UTF-8 encoding (critical for Windows)
+    import sys
+    import io
+    if sys.stdout.encoding != 'utf-8':
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+
     parser = argparse.ArgumentParser(description="Run campaign workflow and capture outputs.")
     parser.add_argument("--input", required=True, help="Path to the YAML campaign file.")
     parser.add_argument("--dropbox", action="store_true", help="Enable Dropbox sync for workflow.")

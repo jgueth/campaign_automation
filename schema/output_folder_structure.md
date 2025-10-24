@@ -1,7 +1,7 @@
 # Output Folder Structure
 
 ## Overview
-This document describes the output folder structure for the Creative Automation Pipeline. The structure is organized hierarchically: **Campaign → Product → Market → Aspect Ratio**.
+This document describes the output folder structure for the Creative Automation Pipeline. The structure is organized hierarchically: **Campaign → Product → Aspect Ratio → Market**.
 
 ## Folder Hierarchy
 
@@ -9,48 +9,48 @@ This document describes the output folder structure for the Creative Automation 
 output/
 └── holiday_gift_guide_2025_eu/
     ├── aromatherapy_diffuser_set/
-    │   ├── uk/
-    │   │   ├── 1x1/
+    │   ├── 1x1/
+    │   │   ├── uk/
     │   │   │   └── hero_image.jpg
-    │   │   ├── 9x16/
+    │   │   ├── de/
     │   │   │   └── hero_image.jpg
-    │   │   └── 16x9/
+    │   │   └── fr/
     │   │       └── hero_image.jpg
-    │   ├── de/
-    │   │   ├── 1x1/
+    │   ├── 9x16/
+    │   │   ├── uk/
     │   │   │   └── hero_image.jpg
-    │   │   ├── 9x16/
+    │   │   ├── de/
     │   │   │   └── hero_image.jpg
-    │   │   └── 16x9/
+    │   │   └── fr/
     │   │       └── hero_image.jpg
-    │   └── fr/
-    │       ├── 1x1/
+    │   └── 16x9/
+    │       ├── uk/
     │       │   └── hero_image.jpg
-    │       ├── 9x16/
+    │       ├── de/
     │       │   └── hero_image.jpg
-    │       └── 16x9/
+    │       └── fr/
     │           └── hero_image.jpg
     └── weighted_throw_blanket/
-        ├── uk/
-        │   ├── 1x1/
+        ├── 1x1/
+        │   ├── uk/
         │   │   └── hero_image.jpg
-        │   ├── 9x16/
+        │   ├── de/
         │   │   └── hero_image.jpg
-        │   └── 16x9/
+        │   └── fr/
         │       └── hero_image.jpg
-        ├── de/
-        │   ├── 1x1/
+        ├── 9x16/
+        │   ├── uk/
         │   │   └── hero_image.jpg
-        │   ├── 9x16/
+        │   ├── de/
         │   │   └── hero_image.jpg
-        │   └── 16x9/
+        │   └── fr/
         │       └── hero_image.jpg
-        └── fr/
-            ├── 1x1/
+        └── 16x9/
+            ├── uk/
             │   └── hero_image.jpg
-            ├── 9x16/
+            ├── de/
             │   └── hero_image.jpg
-            └── 16x9/
+            └── fr/
                 └── hero_image.jpg
 ```
 
@@ -77,17 +77,17 @@ generated_assets/
 - **Format:** `{product_id}` from YAML
 - **Benefit:** Easy to review all localized versions of one product
 
-### Level 3: Market ID
-- **Path:** `output/holiday_gift_guide_2025_eu/aromatherapy_diffuser_set/uk/`
-- **Purpose:** Separate by target market/language
-- **Format:** `{market_id}` from YAML (uk, de, fr)
-- **Benefit:** Clear localization boundaries
-
-### Level 4: Aspect Ratio
-- **Path:** `output/holiday_gift_guide_2025_eu/aromatherapy_diffuser_set/uk/1x1/`
+### Level 3: Aspect Ratio
+- **Path:** `output/holiday_gift_guide_2025_eu/aromatherapy_diffuser_set/1x1/`
 - **Purpose:** Organize by social media format
 - **Format:** `1x1`, `9x16`, `16x9`
 - **Benefit:** Platform-specific asset organization
+
+### Level 4: Market ID
+- **Path:** `output/holiday_gift_guide_2025_eu/aromatherapy_diffuser_set/1x1/uk/`
+- **Purpose:** Separate by target market/language
+- **Format:** `{market_id}` from YAML (uk, de, fr)
+- **Benefit:** Clear localization boundaries
 
 ### Level 5: Final Asset
 - **Filename:** `hero_image.jpg`
@@ -102,7 +102,7 @@ The folder path contains all necessary metadata, keeping filenames simple and co
 
 **Alternative (if needed for upload systems):**
 - Format: `{product_id}_{aspect_ratio}_{market_id}.jpg`
-- Example: `aromatherapy_diffuser_set_1x1_de.jpg`
+- Example: `aromatherapy_diffuser_set_1x1_uk.jpg`
 
 ## Total Output Count
 
@@ -115,37 +115,37 @@ For this campaign:
 ```
 output/holiday_gift_guide_2025_eu/aromatherapy_diffuser_set/
 ```
-View all markets and formats for one product.
-
-### By Market (recommended for market launch)
-```
-output/holiday_gift_guide_2025_eu/*/uk/
-```
-View all products for one market (requires glob pattern or script).
+View all aspect ratios and markets for one product.
 
 ### By Aspect Ratio (recommended for platform upload)
 ```
-output/holiday_gift_guide_2025_eu/*/*/1x1/
+output/holiday_gift_guide_2025_eu/*/1x1/
 ```
-View all 1x1 formats across products and markets.
+View all 1x1 formats across products and markets (requires glob pattern or script).
+
+### By Market (recommended for market launch)
+```
+output/holiday_gift_guide_2025_eu/*/*/uk/
+```
+View all products and formats for one market (requires glob pattern or script).
 
 ## Benefits of This Structure
 
 1. **Product-centric:** Natural workflow for creative teams
-2. **Localization clarity:** Easy to compare translations and adaptations
+2. **Format-first organization:** Easy to review all versions of a specific aspect ratio
 3. **Scalable:** Works for 2 products or 200 products
 4. **Self-documenting:** Path reveals all metadata
-5. **Platform-ready:** Easy to zip by product, market, or format
-6. **Comparison-friendly:** Side-by-side review of localized variants
+5. **Platform-ready:** Easy to zip by product, aspect ratio, or market
+6. **Comparison-friendly:** Side-by-side review of different formats and localized variants
 
 ## Usage in Code
 
 **Example path generation (pseudo-code):**
 ```python
-output_path = f"output/{campaign_id}/{product_id}/{market_id}/{aspect_ratio}/hero_image.jpg"
+output_path = f"output/{campaign_id}/{product_id}/{aspect_ratio}/{market_id}/hero_image.jpg"
 ```
 
 **Example:**
 ```
-output/holiday_gift_guide_2025_eu/aromatherapy_diffuser_set/de/16x9/hero_image.jpg
+output/holiday_gift_guide_2025_eu/aromatherapy_diffuser_set/16x9/de/hero_image.jpg
 ```
