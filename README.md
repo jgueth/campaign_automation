@@ -1,6 +1,28 @@
 # Campaign Creative Automation Tool
 
-This tool automates the creation and localization of marketing campaign creatives across multiple markets and languages.
+## Overview
+
+Creating localized campaign creatives for multiple markets, languages, and products manually is time-consuming and error-prone. This tool automates the entire process from a single campaign definition to localized assets across different platforms and markets.
+
+### What This Tool Does
+
+This creative automation pipeline takes a campaign definition in YAML format along with product assets and automatically generates localized campaign images for multiple markets, products, and aspect ratios.
+
+**A concrete example**: You define a holiday campaign with 2 products targeting 3 European markets (Germany, France, Spain) in 2 aspect ratios. The tool automatically generates 12 localized campaign images (2 products × 3 markets × 2 ratios), each with properly translated messaging and consistent branding.
+
+The workflow handles the complete process end-to-end:
+
+1. **Campaign validation** - Verifies your campaign YAML structure and checks that all required assets exist
+2. **AI prompt generation** - Creates optimized prompts for image generation based on your campaign parameters (GPT-5)
+3. **Lifestyle image generation** - Generates brand-appropriate lifestyle scenes using AI, or uses provided hero images (Gemini 2.5 Flash)
+4. **Product compositing** - Integrates product images and logos into the lifestyle scenes
+5. **Multi-market localization** - Translates campaign messaging to target languages and overlays text on images for each market (Gemini 2.5 Flash for translation)
+6. **Brand compliance checking** - Validates that logos are present in all generated images using computer vision (OpenCV feature detection)
+7. **Report generation** - Creates a comprehensive summary of the campaign execution
+8. **AI-powered analysis** - Analyzes workflow logs and generated report to validate execution quality and provide recommendations (Gemini, available in agent mode)
+9. **Optional Dropbox sync** - Uploads generated assets to cloud storage for team access
+
+The tool generates creatives in multiple aspect ratios (1:1 for Instagram feed, 9:16 for Stories/Reels, 16:9 for YouTube, etc.) to support different social media platforms. Output files are organized by campaign, product, market, and aspect ratio for easy distribution. The tool can run as a command-line workflow for manual execution or in agent mode for automated monitoring of new campaign files.
 
 ## Quick Reference
 
